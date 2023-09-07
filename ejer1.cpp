@@ -13,7 +13,7 @@ int inf = std::numeric_limits<int>::max();
 
 
 bool senderos(vector<vector<pair<char, int>>> &tablero, int i, int j, int l){    
-    if(l == 12 && i == 3 && j == 3) cout << "ACAAAAAAA" << caminoMaximo << endl;
+    //if(l == 12 && i == 3 && j == 3) cout << "ACAAAAAAA" << caminoMaximo << endl;
     
     int n = tablero.size();
     int m = tablero[0].size();
