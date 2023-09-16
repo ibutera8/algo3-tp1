@@ -4,75 +4,66 @@
 #include <utility>
 #include <algorithm>
 
+
 using namespace std;
-
-int mod = 1e9 + 7;
-int mejor_descontento;
+using ll = long long;
 
 
-int calcularDescontento(vector<pair<int,int>> &l,vector<pair<float,int>> &r, int t, int d){
-    for (int i = 0; i < r.size() ; i++) {
-        int posicion = r[i].second; //posicion del parcial que tiene peor ratio tiempo/coeficiente
-        int demora_examen_actual = l[posicion].first % mod; //demora que trae ese examen
-        for (int j = 0; j < l.size(); j++) {   
-            int descontento = (demora_examen_actual * l[j].second) % mod;
-            int nuevo_descontento = (d + descontento) % mod;
-            d = nuevo_descontento % mod;
-        }
+ll mod = 1e9 + 7;
+ll mejor_descontento;
+ll e; 
+ll coeficientes;
 
-        l[posicion].second = 0;
-    }
 
-    return d;
-}
 
+//ordeno segun las multiplicaciones de la relacion menor-igual:
 struct criterio {
-    bool operator()(const std::pair<int,int> &left, const std::pair<int,int> &right) {
-        return (left.first > right.first) || (left.first == right.first && left.second > right.second);
+    bool operator()(const std::pair<ll,ll> &left, const std::pair<ll,ll> &right) {
+        return (((left.first % mod) * (right.second % mod)) <= ((right.first % mod) * (left.second % mod)));
     }
 };
 
-//toma el listado de parciales y devuelve un vector de tuplas de la forma <tiempo / coeficiente, posicion original>:
-vector<pair<float,int>> obtener_Peores(vector<pair<int,int>> l){ 
-    vector<pair<float,int>> res;
-    for ( int i = 0; i < l.size(); i++)
-    {
-        float division = (float)l[i].second / (float)l[i].first;
-        pair <float, int> examen;
-        examen.first= division;
-        examen.second= i;
-        res.push_back(examen);
+//l vector que es lista de los examenes, d acumulador de descontentos 
+ll calcularDescontento(vector<pair<ll,ll>> &l){
+    ll d = 0;
+    sort(l.begin(), l.begin() + e, criterio()); //se ordena segun tiempo_i/coeficiente_i < tiempo_j/coeficiente_j
+    for (int i = 0; i < e ; i++) {
+        ll demora_examen_actual = l[i].first ; //demora que trae ese examen
+        d += ((demora_examen_actual % mod) * (coeficientes %mod)) % mod; 
+        coeficientes = ((coeficientes %mod) - (l[i].second % mod)) %mod;
 
+        l[i].second = 0;
     }
-    sort(res.begin(), res.end(), criterio());
-    return res;
+
+    return (d % mod);
 }
 
 int main(){
-    int cantidad_casos;
+    ll cantidad_casos;
     cin >> cantidad_casos;
+    vector<pair<ll,ll>> l(1e7 +1, make_pair(0,0));
     for (int i = 0; i < cantidad_casos; i++) {
-        mejor_descontento = std::numeric_limits<int>::max();
-        int e;    
+        mejor_descontento = std::numeric_limits<ll>::max();
         cin >> e;
-        vector<pair<int,int>> l(e, make_pair(0,0));
-        //para cada estudiante, ingresame su demora 
+        coeficientes = 0;
+        //para cada estudiante, ingresamos su demora 
         for(int j = 0; j < e; j++){
-            int demora_e;
-            cin >> demora_e;            
+            ll demora_e;
+            cin >> demora_e;
             l[j].first = demora_e; 
             }
-            //para cada estudiante, ingresame su coeficiente
+            //para cada estudiante, ingresamos su coeficiente
         for (int j = 0; j < e; j++){
-            int coeficiente_e;
+            ll coeficiente_e;
             cin >> coeficiente_e;
             l[j].second = coeficiente_e;
-        } 
-        vector<pair<float, int>> r = obtener_Peores(l);
-        //optimizarCorreciones(l, 0,0);
-        cout << calcularDescontento(l, r, 0, 0) << endl; 
+            coeficientes += coeficiente_e;
+        }
+
+
+        cout << calcularDescontento(l) << endl; 
 
     }
-  
+
     return 0;
 }
